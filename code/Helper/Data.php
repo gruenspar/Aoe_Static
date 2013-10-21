@@ -165,6 +165,9 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
                 // Use purge host instead of store host
                 $url = str_replace($components['host'], $purgeHost, $url);
 
+                // Use only http to purge
+                $url = str_replace("https:", "http:", $url);
+
                 $ch = curl_init();
                 $this->log('Purge url: ' . $url);
                 $options = array(
