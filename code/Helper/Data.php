@@ -154,7 +154,7 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
         $autoRebuild = Mage::getStoreConfig('system/aoe_static/auto_rebuild_cache');
         $purgeHosts = Mage::getStoreConfig('system/aoe_static/purge_hosts');
 
-        $purgeHosts = array_filter(array_map('trim', explode('\n', $purgeHosts)));
+        $purgeHosts = array_filter(array_map('trim', explode("\n", $purgeHosts)));
 
         $purgeHosts = $purgeHosts ? $purgeHosts : array(Mage::getBaseUrl());
 
