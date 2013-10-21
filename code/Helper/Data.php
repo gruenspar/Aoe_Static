@@ -159,37 +159,37 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
         $purgeHosts = $purgeHosts ? $purgeHosts : array(Mage::getBaseUrl());
 
         foreach ($purgeHosts as $purgeHost) {
-          foreach ($urls as $url) {
-              $components = parse_url('' . $url);
+            foreach ($urls as $url) {
+                $components = parse_url('' . $url);
 
-              // Use purge host instead of store host domain
-              $url = str_replace($components['host'], $purgeHost, $url);
+                // Use purge host instead of store host
+                $url = str_replace($components['host'], $purgeHost, $url);
 
-              $ch = curl_init();
-              $this->log('Purge url: ' . $url);
-              $options = array(
-                  CURLOPT_URL => $url,
-                  CURLOPT_HTTPHEADER => array('Host: ' . $components['host'])
-              );
+                $ch = curl_init();
+                $this->log('Purge url: ' . $url);
+                $options = array(
+                    CURLOPT_URL => $url,
+                    CURLOPT_HTTPHEADER => array('Host: ' . $components['host'])
+                );
 
-              if ($syncronPurge || !$autoRebuild) {
-                  $options[CURLOPT_CUSTOMREQUEST] = 'PURGE';
-              } else {
-                  $options[CURLOPT_HTTPHEADER][] = "Cache-Control: no-cache";
-                  $options[CURLOPT_HTTPHEADER][] = "Pragma: no-cache";
-              }
-              $options[CURLOPT_RETURNTRANSFER] = 1;
-              $options[CURLOPT_SSL_VERIFYPEER] = 0;
-              $options[CURLOPT_SSL_VERIFYHOST] = 0;
-              curl_setopt_array($ch, $options);
+                if ($syncronPurge || !$autoRebuild) {
+                    $options[CURLOPT_CUSTOMREQUEST] = 'PURGE';
+                } else {
+                    $options[CURLOPT_HTTPHEADER][] = "Cache-Control: no-cache";
+                    $options[CURLOPT_HTTPHEADER][] = "Pragma: no-cache";
+                }
+                $options[CURLOPT_RETURNTRANSFER] = 1;
+                $options[CURLOPT_SSL_VERIFYPEER] = 0;
+                $options[CURLOPT_SSL_VERIFYHOST] = 0;
+                curl_setopt_array($ch, $options);
 
-              curl_multi_add_handle($mh, $ch);
-              $curlRequests[] = array(
+                curl_multi_add_handle($mh, $ch);
+                $curlRequests[] = array(
                   'handler' => $ch,
                   'url' => $url
-              );
-              $this->log('Info about curlRequests', compact('options'));
-          }
+                );
+                $this->log('Info about curlRequests', compact('options'));
+            }
         }
 
         do {
