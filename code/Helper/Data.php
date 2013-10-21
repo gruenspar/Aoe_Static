@@ -154,38 +154,45 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
         $autoRebuild = Mage::getStoreConfig('system/aoe_static/auto_rebuild_cache');
         $purgeHosts = Mage::getStoreConfig('system/aoe_static/purge_hosts');
 
-        $purgeHosts = array_filter(array_map('trim', explode('\n', $purgeHosts)));
+        $purgeHosts = array_filter(array_map('trim', explode("\n", $purgeHosts)));
 
         $purgeHosts = $purgeHosts ? $purgeHosts : array(Mage::getBaseUrl());
 
         foreach ($purgeHosts as $purgeHost) {
-          foreach ($urls as $url) {
-              $components = parse_url('' . $url);
-              $ch = curl_init();
-              $this->log('Purge url: ' . $url);
-              $options = array(
-                  CURLOPT_URL => $url,
-                  CURLOPT_HTTPHEADER => array('Host: ' . $components['host'])
-              );
+            foreach ($urls as $url) {
+                $components = parse_url('' . $url);
 
-              if ($syncronPurge || !$autoRebuild) {
-                  $options[CURLOPT_CUSTOMREQUEST] = 'PURGE';
-              } else {
-                  $options[CURLOPT_HTTPHEADER][] = "Cache-Control: no-cache";
-                  $options[CURLOPT_HTTPHEADER][] = "Pragma: no-cache";
-              }
-              $options[CURLOPT_RETURNTRANSFER] = 1;
-              $options[CURLOPT_SSL_VERIFYPEER] = 0;
-              $options[CURLOPT_SSL_VERIFYHOST] = 0;
-              curl_setopt_array($ch, $options);
+                // Use purge host instead of store host
+                $url = str_replace($components['host'], $purgeHost, $url);
 
-              curl_multi_add_handle($mh, $ch);
-              $curlRequests[] = array(
+                // Use only http to purge
+                $url = str_replace("https:", "http:", $url);
+
+                $ch = curl_init();
+                $this->log('Purge url: ' . $url);
+                $options = array(
+                    CURLOPT_URL => $url,
+                    CURLOPT_HTTPHEADER => array('Host: ' . $components['host'])
+                );
+
+                if ($syncronPurge || !$autoRebuild) {
+                    $options[CURLOPT_CUSTOMREQUEST] = 'PURGE';
+                } else {
+                    $options[CURLOPT_HTTPHEADER][] = "Cache-Control: no-cache";
+                    $options[CURLOPT_HTTPHEADER][] = "Pragma: no-cache";
+                }
+                $options[CURLOPT_RETURNTRANSFER] = 1;
+                $options[CURLOPT_SSL_VERIFYPEER] = 0;
+                $options[CURLOPT_SSL_VERIFYHOST] = 0;
+                curl_setopt_array($ch, $options);
+
+                curl_multi_add_handle($mh, $ch);
+                $curlRequests[] = array(
                   'handler' => $ch,
                   'url' => $url
-              );
-              $this->log('Info about curlRequests', compact('options'));
-          }
+                );
+                $this->log('Info about curlRequests', compact('options'));
+            }
         }
 
         do {
