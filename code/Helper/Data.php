@@ -118,10 +118,12 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
         $conn = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $conn->query('SET foreign_key_checks = 0;');
         foreach (array('url', 'tag', 'urltag') as $table) {
             $resource = Mage::getResourceModel('aoestatic/' . $table);
             $conn->query(sprintf('TRUNCATE %s;', $resource->getMainTable()));
         }
+        $conn->query('SET foreign_key_checks = 1;');
         return $this->purge(array($baseUrl . '.*'));
     }
 
