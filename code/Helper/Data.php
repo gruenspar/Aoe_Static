@@ -10,6 +10,9 @@
  */
 class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    const CONFIG_WRITE_TO_DATABASE = 'system/aoe_static/write_to_database';
+
+
     /**
      * Chechs, if varnish is currently active
      *
@@ -18,6 +21,16 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     public function isActive()
     {
         return Mage::app()->useCache('aoestatic');
+    }
+
+    /**
+     * Return whether to write URLs to database.
+     *
+     * @return bool
+     */
+    public function writeToDatabase()
+    {
+        return Mage::getStoreConfigFlag(self::CONFIG_WRITE_TO_DATABASE);
     }
 
     /**
@@ -57,7 +70,7 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     public function getCustomerBlocks()
     {
         $blocks = explode(',',
-                Mage::getStoreConfig('system/aoe_static/customer_blocks'));
+            Mage::getStoreConfig('system/aoe_static/customer_blocks'));
         $customerBlocks = array();
         foreach($blocks as $block) {
             $block = explode(';', $block);
@@ -190,8 +203,8 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 
                 curl_multi_add_handle($mh, $ch);
                 $curlRequests[] = array(
-                  'handler' => $ch,
-                  'url' => $url
+                    'handler' => $ch,
+                    'url' => $url
                 );
                 $this->log('Info about curlRequests', compact('options'));
             }
@@ -230,7 +243,7 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 
         if (count($errors) > 0)
         {
-          $this->log('Errors occured while purging.', compact('urls', 'errors'));
+            $this->log('Errors occured while purging.', compact('urls', 'errors'));
         }
 
         return $errors;
@@ -238,10 +251,10 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected function log( $message, $params = null )
     {
-      if (!is_null($params))
-      {
-        $message = print_r(compact('message', 'params'), 1);
-      }
-      Mage::log($message, null, 'aoestatic.' . date('Y-m-d') . '.log');
+        if (!is_null($params))
+        {
+            $message = print_r(compact('message', 'params'), 1);
+        }
+        Mage::log($message, null, 'aoestatic.' . date('Y-m-d') . '.log');
     }
 }

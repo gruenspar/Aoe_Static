@@ -14,6 +14,30 @@ class Aoe_Static_Model_Observer
     var $customerBlocks=null;
 
     /**
+     * Return whether there are special options set in the current session
+     * so we better not cache this page.
+     *
+     * @param string $fullActionName Full action name.
+     *
+     * @return bool
+     */
+    protected function hasSpecialOptionsSet($fullActionName)
+    {
+        $isCategoryPage = (strpos($fullActionName, "catalog_category") !== false);
+        $isFilterPage   = (strpos($fullActionName, "amshopby_index_index") !== false);
+        if ($isCategoryPage || $isFilterPage) {
+            /** @var Mage_Catalog_Model_Session $catalogSession */
+            $catalogSession = Mage::getSingleton('catalog/session');
+
+            if ($catalogSession->hasLimitPage() || $catalogSession->hasSortOrder()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Check when varnish caching should be enabled.
      *
      * @param Varien_Event_Observer $observer
@@ -23,42 +47,42 @@ class Aoe_Static_Model_Observer
     {
 
         /* @var $helper Aoe_Static_Helper_Data */
-        $helper = Mage::helper('aoestatic'); 
+        $helper = Mage::helper('aoestatic');
         /* @var $event Varien_Event */
-        $event = $observer->getEvent(); 
+        $event = $observer->getEvent();
         /* @var $controllerAction Mage_Core_Controller_Varien_Action */
-        $controllerAction = $event->getControllerAction(); 
+        $controllerAction = $event->getControllerAction();
         $fullActionName = $controllerAction->getFullActionName();
 
         $lifetime = $helper->isCacheableAction($fullActionName);
 
         /* @var $response Mage_Core_Controller_Response_Http */
-        $response = $controllerAction->getResponse(); 
-        if ($lifetime) {
+        $response = $controllerAction->getResponse();
+        if ($lifetime && !$this->hasSpecialOptionsSet($fullActionName)) {
             // allow caching
             // Only for debugging and information
-            $response->setHeader('X-Magento-Lifetime', $lifetime, true); 
+            $response->setHeader('X-Magento-Lifetime', $lifetime, true);
             $response->setHeader('Cache-Control', 'max-age='. $lifetime, true);
             $response->setHeader('aoestatic', 'cache', true);
         } else {
             // do not allow caching
             /* @var $cookie Mage_Core_Model_Cookie */
-            $cookie = Mage::getModel('core/cookie'); 
+            $cookie = Mage::getModel('core/cookie');
 
             $name = '';
             $loggedIn = false;
             /* @var $session Mage_Customer_Model_Session  */
-            $session = Mage::getSingleton('customer/session'); 
+            $session = Mage::getSingleton('customer/session');
             if ($session->isLoggedIn()) {
                 $loggedIn = true;
                 $name = $session->getCustomer()->getName();
             }
             // Only for debugging and information
-            $response->setHeader('X-Magento-LoggedIn', $loggedIn ? '1' : '0', true); 
+            $response->setHeader('X-Magento-LoggedIn', $loggedIn ? '1' : '0', true);
             $cookie->set('aoestatic_customername', $name, '3600', '/');
         }
         // Only for debugging and information
-        $response->setHeader('X-Magento-Action', $fullActionName, true); 
+        $response->setHeader('X-Magento-Action', $fullActionName, true);
 
         return $this;
     }
@@ -99,7 +123,8 @@ class Aoe_Static_Model_Observer
      */
     public function cleanVarnishCache($observer)
     {
-        $varnishHelper = Mage::helper('aoestatic'); /* @var $varnishHelper Magneto_Varnish_Helper_Data */
+        /** @var Aoe_Static_Helper_Data $varnishHelper */
+        $varnishHelper = Mage::helper('aoestatic');
         $types = Mage::app()->getRequest()->getParam('types');
         if (Mage::app()->useCache('aoestatic') ) {
             if( (is_array($types) && in_array('aoestatic', $types)) || $types == "aoestatic") {
@@ -137,7 +162,9 @@ class Aoe_Static_Model_Observer
      * Replace content block wiht placeholder content
      * if block is customer related.
      *
-     * @param type $observer
+     * @param Varien_Event_Observer $observer
+     *
+     * @return void
      */
     protected function replacePlacholder($observer)
     {
@@ -157,6 +184,9 @@ class Aoe_Static_Model_Observer
         }
     }
 
+    /**
+     * @return Aoe_Static_Helper_Data
+     */
     public function getHelper()
     {
         return Mage::helper('aoestatic');

@@ -71,20 +71,28 @@ class Aoe_Static_Model_Cache
         $this->isCacheableAction = $this->isCacheableAction
             && $this->getHelper()->isCacheableAction();
         if ($this->isCacheableAction) {
-            $this->tags = array_merge(
-                $this->fetchTagsForStaticBlocks($this->staticBlocks),
-                $this->tags
-            );
-            $tags = Mage::getModel('aoestatic/tag')
-                ->loadTagsCollection(array_unique($this->tags));
-            $currentUrl = Mage::helper('core/url')->getCurrentUrl();
-            $url = Mage::getModel('aoestatic/url')
-                ->loadOrCreateUrl($currentUrl);
-            $url->setTags($tags);
+
+            if ($this->getHelper()->writeToDatabase()) {
+                $this->tags = array_merge(
+                    $this->fetchTagsForStaticBlocks($this->staticBlocks),
+                    $this->tags
+                );
+                $tags = Mage::getModel('aoestatic/tag')
+                    ->loadTagsCollection(array_unique($this->tags));
+                $currentUrl = Mage::helper('core/url')->getCurrentUrl();
+                $url = Mage::getModel('aoestatic/url')
+                    ->loadOrCreateUrl($currentUrl);
+                $url->setTags($tags);
+            }
         }
         return $this;
     }
 
+    /**
+     * Get extension helper.
+     *
+     * @return Aoe_Static_Helper_Data
+     */
     public function getHelper()
     {
         return Mage::helper('aoestatic');
@@ -220,8 +228,8 @@ class Aoe_Static_Model_Cache
 
     /**
      * generates ul-html list of given array
-     * 
-     * @param Array(string) $list 
+     *
+     * @param Array(string) $list
      * @return string
      */
     protected static function getListHtml($list)

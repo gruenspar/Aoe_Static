@@ -57,7 +57,7 @@
                     <use>core_read</use>
                 </connection>
             </aoestatic_read>
-        </resources> 
+        </resources>
         <helpers>
             <aoestatic>
                 <class>Aoe_Static_Helper</class>
@@ -166,6 +166,7 @@ catalog_category_view;86400]]>
                 <customer_blocks><![CDATA[top.links,
 cart.sidebar]]>
                 </customer_blocks>
+                <write_to_database>1</write_to_database>
             </aoe_static>
         </system>
     </default>
