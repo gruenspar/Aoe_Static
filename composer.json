@@ -1,0 +1,26 @@
+{
+    "name": "gruenspar/aoe-static",
+    "type": "magento-module",
+    "description": "Aoe_Static adds advanced varnish functionality to your Magento shop.",
+    "homepage": "https://github.com/gruenspar/Aoe_Static",
+    "authors": [
+        {
+            "name": "Fabrizio Branca"
+        },
+        {
+            "name": "Stephan Hoyer"
+        },
+        {
+            "name": "Gruenspar IT"
+        }
+    ],
+    "require": {
+        "magento-hackathon/magento-composer-installer":"*"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.firegento.com"
+        }
+    ]
+}
