@@ -116,6 +116,14 @@
             </aoestatic>
         </routers>
         <events>
+            <core_block_abstract_to_html_before>
+                <observers>
+                    <aoestatic>
+                        <class>aoestatic/observer</class>
+                        <method>htmlBefore</method>
+                    </aoestatic>
+                </observers>
+            </core_block_abstract_to_html_before>
             <core_block_abstract_to_html_after>
                 <observers>
                     <aoestatic>
