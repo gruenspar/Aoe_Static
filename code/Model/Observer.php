@@ -140,6 +140,33 @@ class Aoe_Static_Model_Observer
     }
 
     /**
+     * Unsets template for every dynamically loaded block to avoid it being rendered
+     * if current action is cachable. Useful if one-time session toggles are used in
+     * dynamic blocks.
+     *
+     * @param Varien_Event_Observer $observer
+     *
+     * @return Aoe_Static_Model_Observer
+     */
+    public function htmlBefore($observer)
+    {
+        /** @var Mage_Core_Block_Abstract $block */
+        $block = $observer->getBlock();
+        $name = $block->getNameInLayout();
+        if (is_null($this->customerBlocks)) {
+            $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
+        }
+        if (array_key_exists($name, $this->customerBlocks)) {
+            $this->isCacheableAction = $this->isCacheableAction
+                && $this->getHelper()->isCacheableAction();
+            if ($this->isCacheableAction) {
+                $block->setTemplate(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Fires collect tags and replacePlaceholder functions for every block
      * if current action is cachable.
      *
