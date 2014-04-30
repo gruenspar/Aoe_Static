@@ -140,10 +140,12 @@ class Aoe_Static_Model_Observer
     }
 
     /**
-     * Fires collect tags and replacePlaceholder functions for every block
-     * if current action is cachable.
+     * Unsets template for every dynamically loaded block to avoid it being rendered
+     * if current action is cachable. Useful if one-time session toggles are used in
+     * dynamic blocks.
      *
-     * @param type $observer
+     * @param Varien_Event_Observer $observer
+     *
      * @return Aoe_Static_Model_Observer
      */
     public function htmlBefore($observer)
