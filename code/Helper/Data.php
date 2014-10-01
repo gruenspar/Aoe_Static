@@ -10,8 +10,10 @@
  */
 class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const CONFIG_WRITE_TO_DATABASE = 'system/aoe_static/write_to_database';
-
+    const CONFIG_WRITE_TO_DATABASE      = 'system/aoe_static/write_to_database';
+    const CONFIG_USE_SESSION_STORAGE    = 'system/aoe_static/use_session_storage';
+    const CONFIG_SESSION_STORAGE_BLOCKS = 'system/aoe_static/session_storage_store_blocks';
+    const CONFIG_SESSION_STORAGE_GROUPS = 'system/aoe_static/session_storage_clear_groups';
 
     /**
      * Chechs, if varnish is currently active
@@ -31,6 +33,68 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     public function writeToDatabase()
     {
         return Mage::getStoreConfigFlag(self::CONFIG_WRITE_TO_DATABASE);
+    }
+
+    /**
+     * Return if session storage should be used for caching of phone call.
+     *
+     * @return bool
+     */
+    public function useSessionStorage()
+    {
+        return Mage::getStoreConfigFlag(self::CONFIG_USE_SESSION_STORAGE);
+    }
+
+    /**
+     * Return configured blocks to store in session storage.
+     *
+     * @return array
+     */
+    public function getSessionStorageBlocks()
+    {
+        $config = (string) Mage::getStoreConfig(self::CONFIG_SESSION_STORAGE_BLOCKS);
+
+        $lines = str_replace(",", "\n", $config);
+
+        $blocks = explode("\n", $lines);
+        $blocks = array_map('trim', $blocks);
+        $blocks = array_filter($blocks);
+        $blocks = array_unique($blocks);
+
+        return $blocks;
+    }
+
+    /**
+     * Return configured block groups.
+     *
+     * @return array
+     */
+    public function getSessionStorageGroups()
+    {
+        $config = (string) Mage::getStoreConfig(self::CONFIG_SESSION_STORAGE_GROUPS);
+        $groups = array();
+
+        $lines = explode("\n", $config);
+        foreach ($lines as $line) {
+            $parts = explode(":", $line);
+
+            if (count($parts) < 2) {
+                continue;
+            }
+
+            $groupName = trim($parts[0]);
+
+            $blocks = explode(",", $parts[1]);
+            $blocks = array_map('trim', $blocks);
+            $blocks = array_filter($blocks);
+            $blocks = array_unique($blocks);
+
+            if ($groupName && count($blocks) > 0) {
+                $groups[$groupName] = $blocks;
+            }
+        }
+
+        return $groups;
     }
 
     /**
@@ -63,19 +127,55 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Get block HTML for a list of block names. These blocks
+     * contain dynamically served content.
+     *
+     * @param array                  $requestedBlockNames Block names to get.
+     * @param Mage_Core_Model_Layout $layout              The Layout.
+     *
+     * @return string[]
+     */
+    public function getDynamicResponseBlockHtml($requestedBlockNames, $layout)
+    {
+        $responseBlocks = array();
+
+        if (is_array($requestedBlockNames)) {
+            $requestedBlockNames = array_unique($requestedBlockNames);
+            foreach ($requestedBlockNames as $id => $requestedBlockName) {
+                $tmpBlock = $layout->getBlock($requestedBlockName);
+                if ($tmpBlock) {
+                    if ($requestedBlockName == 'messages') {
+                        $responseBlocks[$id] = $layout->getMessagesBlock()->getGroupedHtml();
+                    } elseif ($requestedBlockName == 'global_messages') {
+                        $responseBlocks[$id] = $tmpBlock->getGroupedHtml();
+                    } else {
+                        $responseBlocks[$id] = $tmpBlock->toHtml();
+                    }
+                } else {
+                    $responseBlocks[$id] = '<!--BLOCK NOT FOUND-->';
+                }
+            }
+        }
+        return $responseBlocks;
+    }
+
+    /**
      * Return all block names that are configured to be customer related.
      *
      * @return array
      */
     public function getCustomerBlocks()
     {
-        $blocks = explode(',',
-            Mage::getStoreConfig('system/aoe_static/customer_blocks'));
+        $blockConfig = Mage::getStoreConfig('system/aoe_static/customer_blocks');
+        $blockConfig = str_replace("\r", "", $blockConfig);
+        $blockConfig = str_replace("\n", ",", $blockConfig);
+        $blocks = explode(',', $blockConfig);
+
         $customerBlocks = array();
         foreach($blocks as $block) {
             $block = explode(';', $block);
             $customerBlocks[trim($block[0])] = sizeof($block) > 1
-                ? trim($block[1]) : '';
+                ? trim($block[1]) : $block[0];
         }
         return array_filter($customerBlocks);
     }

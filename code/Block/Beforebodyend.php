@@ -30,7 +30,7 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
      *
      * @return bool
      */
-    public function isLoggedIn() 
+    public function isLoggedIn()
     {
         return $this->getSession()->isLoggedIn();
     }
@@ -57,5 +57,63 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
     public function getCartSummaryCount()
     {
         // return Mage::helper('checkout/cart')->getSummaryCount();
+    }
+
+    /**
+     * Return whether cookie mode is enabled.
+     *
+     * @return bool
+     */
+    public function useSessionStorage()
+    {
+        return $this->_getHelper()->useSessionStorage();
+    }
+
+    /**
+     * Convert an array to JSON string.
+     *
+     * @param array $array Array to encode.
+     *
+     * @return string
+     */
+    public function toJson($array)
+    {
+        /** @var Mage_Core_Helper_Data $helper */
+        $helper = Mage::helper('core');
+        return $helper->jsonEncode($array, false, array( 'enableJsonExprFinder' => true ));
+    }
+
+    /**
+     * Return configured blocks to store in session storage.
+     * As JSON.
+     *
+     * @return string
+     */
+    public function getSessionStorageBlocks()
+    {
+        $blocks = $this->_getHelper()->getSessionStorageBlocks();
+        return $this->toJson($blocks);
+    }
+
+    /**
+     * Return configured groups for clearing session storage.
+     * As JSON.
+     *
+     * @return string
+     */
+    public function getSessionStorageGroups()
+    {
+        $groups = $this->_getHelper()->getSessionStorageGroups();
+        return $this->toJson($groups);
+    }
+
+    /**
+     * Return Aoe_Static helper.
+     *
+     * @return Aoe_Static_Helper_Data
+     */
+    protected function _getHelper()
+    {
+        return Mage::helper("aoestatic");
     }
 }

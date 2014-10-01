@@ -1,10 +1,43 @@
-<?php /* @var $this Aoe_Static_Block_Beforebodyend */?>
+<?php
+/** @var Aoe_Static_Block_Beforebodyend $this */
+
+$phoneCallUrl = Mage::getUrl(
+    'phone/call/index',
+    Mage::app()->getStore()->isCurrentlySecure() ? array('_secure' => 1) : array()
+);
+
+$currentProductId = ($_product = Mage::registry('product')) == true ?
+    $_product->getId() :
+    "null";
+
+?>
 <script type="text/javascript">
-//<![CDATA[
-	var AJAXHOME_URL = '<?php echo Mage::getUrl('phone/call/index', Mage::app()->getStore()->isCurrentlySecure() ? array('_secure' => 1) : array()) ?>';
-	var FULLACTIONNAME = '<?php echo $this->getAction()->getFullActionName() ?>';
-	<?php if (($_product = Mage::registry('product')) == true) : ?>var CURRENTPRODUCTID = '<?php echo $_product->getId() ?>';<?php endif; ?>
-	var CUSTOMERNAME = '<?php echo $this->getCustomerName() ?>';
-	var CARTSUMMARYCOUNT = '<?php echo $this->getCartSummaryCount(); ?>';
-//]]>
+
+    var ajaxHomeCall = Object.create(ajaxHomeCallPrototype, {
+        ajaxHomeUrl: {
+            value: '<?php echo $phoneCallUrl; ?>'
+        },
+        fullActionName: {
+            value: '<?php echo $this->getAction()->getFullActionName() ?>'
+        },
+        customerName: {
+            value: '<?php echo $this->getCustomerName() ?>'
+        },
+        useSessionStorage: {
+            value: <?php echo $this->useSessionStorage() ? "true" : "false" ?>
+        },
+        currentProductId: {
+            value: <?php echo $currentProductId; ?>
+        },
+        cartSummaryCount: {
+            value: '<?php echo $this->getCartSummaryCount(); ?>'
+        },
+        sessionStorageBlocks: {
+            value: <?php echo $this->getSessionStorageBlocks(); ?>
+        },
+        sessionStorageGroups: {
+            value: <?php echo $this->getSessionStorageGroups(); ?>
+        }
+    }).init();
+
 </script>
