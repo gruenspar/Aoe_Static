@@ -102,6 +102,53 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </write_to_database>
+                        <use_session_storage translate="label">
+                            <label>Use client session storage</label>
+                            <comment><![CDATA[Client performance improvement: Store dynamic data in session storage and avoid phone call AJAX request.]]>
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>600</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </use_session_storage>
+                        <session_storage_store_blocks translate="label">
+                            <label>Blocks to store in session storage</label>
+                            <comment>
+                                <![CDATA[
+                                    Provide names of blocks to store in session storage to improve performance.
+                                    Separate by \n or ,
+                                ]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>605</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </session_storage_store_blocks>
+                        <session_storage_clear_groups translate="label">
+                            <label>Session storage block groups</label>
+                            <comment>
+                                <![CDATA[
+                                    Configure which blocks to clear from session storage when certain events occur.
+                                    Group names: cart, customer. Format: <br />
+                                    <code>
+                                        group_name_1:block_1,block_2<br/>
+                                        group_name_2:block_3
+                                    </code><br /><br />
+
+                                    Example:<br />
+                                    <code>
+                                        cart:header.cart<br />
+                                        customer:header.login_link
+                                    </code>
+                                ]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>610</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </session_storage_clear_groups>
                     </fields>
                 </aoe_static>
             </groups>

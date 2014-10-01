@@ -5,14 +5,14 @@
         </reference>
 
         <reference name="before_body_end">
-            <block type="aoestatic/beforebodyend" template="aoestatic/beforebodyend.phtml"></block>
+            <block type="aoestatic/beforebodyend" template="aoestatic/beforebodyend.phtml" />
         </reference>
 
         <reference name="header">
 
             <action method="unsetChild"><param>header.cart</param></action>
 
-            <block type="core/text" name="ph_cart" as="cart" before="-">
+            <block type="core/text" name="ph_cart" as="cart-placeholder" before="-">
                 <action method="setText">
                     <param><![CDATA[
                     <div id="header.cart" class="placeholder topcart" rel="header.cart">
@@ -21,7 +21,7 @@
                 </action>
             </block>
 
-            <block type="checkout/cart_sidebar" name="header.cart" as="placeholdercart" template="checkout/cart/top.phtml" />
+            <block type="checkout/cart_sidebar" name="header.cart" as="cart" template="checkout/cart/top.phtml" />
         </reference>
     </default>
     <!-- This layout handle will only be processed if a cacheable controller action is detected (see configuration) -->

@@ -16,7 +16,8 @@ class Aoe_Static_CallController extends Mage_Core_Controller_Front_Action
      */
     public function indexAction()
     {
-        // if (!$this->getRequest()->isXmlHttpRequest()) { Mage::throwException('This is not an XmlHttpRequest'); }
+        /** @var Aoe_Static_Helper_Data $helper */
+        $helper = Mage::helper("aoestatic");
 
         $response = array();
         $response['sid'] = Mage::getModel('core/session')->getEncryptedSessionId();
@@ -33,23 +34,8 @@ class Aoe_Static_CallController extends Mage_Core_Controller_Front_Action
         $layout = $this->getLayout();
 
         $requestedBlockNames = $this->getRequest()->getParam('getBlocks');
-        if (is_array($requestedBlockNames)) {
-            $requestedBlockNames = array_unique($requestedBlockNames);
-            foreach ($requestedBlockNames as $id => $requestedBlockName) {
-                $tmpBlock = $layout->getBlock($requestedBlockName);
-                if ($tmpBlock) {
-                    if($requestedBlockName == 'messages'){
-                        $response['blocks'][$id] = $layout->getMessagesBlock()->getGroupedHtml();
-                    }elseif($requestedBlockName == 'global_messages'){
-                        $response['blocks'][$id] = $tmpBlock->getGroupedHtml();
-                    }else{
-                        $response['blocks'][$id] = $tmpBlock->toHtml();
-                    }
-                } else {
-                    $response['blocks'][$id] = '<!--BLOCK NOT FOUND-->';
-                }
-            }
-        }
+        $response['blocks']  = $helper->getDynamicResponseBlockHtml($requestedBlockNames, $layout);
+
         $this->getResponse()->setBody(Zend_Json::encode($response));
     }
 }

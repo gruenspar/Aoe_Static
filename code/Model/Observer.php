@@ -200,14 +200,27 @@ class Aoe_Static_Model_Observer
             $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
         }
         if (array_key_exists($name, $this->customerBlocks)) {
-            $placholder = '<div class="placeholder" rel="%s">%s</div>';
+            $placeholder = '<div class="placeholder" rel="%s">%s%s</div>';
+
+            if ($this->getHelper()->useSessionStorage()
+                && in_array($name, $this->getHelper()->getSessionStorageBlocks())
+            ) {
+                $instantLoad = sprintf(
+                    '<script type="text/javascript">ajaxHomeInstantLoad("%s");</script>',
+                    $name
+                );
+            } else {
+                $instantLoad = "";
+            }
+
             $cmsHtml = '';
             if ($this->customerBlocks[$name]) {
                 $block = Mage::getBlockSingleton('cms/block')
                     ->setBlockId($this->customerBlocks[$name]);
                 $cmsHtml = $block->toHtml();
             }
-            $observer->getTransport()->setHtml(sprintf($placholder, $name, $cmsHtml));
+
+            $observer->getTransport()->setHtml(sprintf($placeholder, $name, $cmsHtml, $instantLoad));
         }
     }
 
