@@ -9,10 +9,9 @@
         </reference>
 
         <reference name="header">
-
             <action method="unsetChild"><param>header.cart</param></action>
 
-            <block type="core/text" name="ph_cart" as="cart-placeholder" before="-">
+            <block type="core/text" name="ph_cart" as="cart" before="-">
                 <action method="setText">
                     <param><![CDATA[
                     <div id="header.cart" class="placeholder topcart" rel="header.cart">
@@ -21,7 +20,8 @@
                 </action>
             </block>
 
-            <block type="checkout/cart_sidebar" name="header.cart" as="cart" template="checkout/cart/top.phtml" />
+            <!-- rename "cart-with-real-content" to "cart" when all stores are transitioned -->
+            <block type="checkout/cart_sidebar" name="header.cart" as="cart-with-real-content" template="checkout/cart/top.phtml" />
         </reference>
     </default>
     <!-- This layout handle will only be processed if a cacheable controller action is detected (see configuration) -->
