@@ -105,13 +105,15 @@ var ajaxHomeCallPrototype = {
 
     bindUpdateEvents: function() {
         var $this = this;
-        jQuery(window).bind('update-block', function(e, data) {
+        jQuery(window).bind('after-replace-block', function(e, data) {
             if (!$this.acceptUpdateEvents) {
                 return;
             }
 
-            var key     = data.block;
-            var content = data.html;
+            var block = data.block;
+
+            var key     = block.name;
+            var content = block.html;
             var blocks  = {}
             blocks[key] = content;
             $this.writeToStorage(blocks);
