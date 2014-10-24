@@ -28,18 +28,18 @@ var ajaxHomeCallPrototype = {
     acceptUpdateEvents: true,
     sessionStorageBlocks: [],
     sessionStorageGroups: {},
-    
+
     init: function() {
         this.isJQ = (typeof jQuery !== "undefined");
         this.load();
         this.bindEvents();
     },
-    
+
     canUseSessionStorage: function() {
-        return this.isJQ 
-            && this.useSessionStorage 
-            && (typeof sessionStorage !== "undefined") 
-            && (typeof localStorage !== "undefined");
+        return this.isJQ
+        && this.useSessionStorage
+        && (typeof sessionStorage !== "undefined")
+        && (typeof localStorage !== "undefined");
     },
 
     getPlaceholderElements: function() {
@@ -56,7 +56,7 @@ var ajaxHomeCallPrototype = {
     },
 
     getClearBlockNames: function(area) {
-        return this.sessionStorageGroups[area];
+        return this.sessionStorageGroups[area] || [];
     },
 
     bindEvents: function() {
@@ -76,15 +76,24 @@ var ajaxHomeCallPrototype = {
         }
     },
 
-    clearCart: function() {
+    clearCartBlocks: function() {
         return this.clearBlocks('cart');
+    },
+
+    clearCustomerBlocks: function() {
+        return this.clearBlocks('customer');
     },
 
     bindClearEvents: function() {
         if (window.location.pathname.match(/checkout/)
             && !jQuery("body").hasClass('advanced-checkout-cart-index')
         ) {
-            this.clearCart();
+            this.clearCartBlocks();
+        }
+
+        if (window.location.pathname.match(/customer/)) {
+            this.clearCustomerBlocks();
+            this.clearCartBlocks();
         }
 
         var $this = this;
@@ -98,7 +107,7 @@ var ajaxHomeCallPrototype = {
 
         jQuery(function() {
             jQuery('.add-to-cart').bind('click', function() {
-                $this.clearCart();
+                $this.clearCartBlocks();
             });
         });
     },
