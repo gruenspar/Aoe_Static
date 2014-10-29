@@ -80,7 +80,9 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
     {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = Mage::helper('core');
-        return $helper->jsonEncode($array, false, array( 'enableJsonExprFinder' => true ));
+
+        $result = $helper->jsonEncode($array);
+        return $result;
     }
 
     /**
