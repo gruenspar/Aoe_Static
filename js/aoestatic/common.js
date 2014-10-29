@@ -153,6 +153,9 @@ var ajaxHomeCallPrototype = {
             return;
         }
 
+        initJQueryCookiePlugin();
+        this.applyCrossOriginRemoves();
+
         var storedContents = this.getFromStorage();
 
         if (storedContents) {
@@ -199,9 +202,74 @@ var ajaxHomeCallPrototype = {
         sessionStorage.removeItem(key);
         this.writeToStorage(storedContents, key);
 
+        this.crossOriginRemoveFromStorage(key);
+
         if (!noTriggerRefresh) {
             this.triggerRefreshEvent(key);
         }
+    },
+
+    applyCrossOriginRemoves: function() {
+        var key, index;
+        var protocol = this.getReverseProtocol();
+        var protocolCookieContents = this.getCookieContentsForProtocol(protocol);
+
+        for (index = 0; index < protocolCookieContents.length; index++) {
+            key = protocolCookieContents[index];
+            this.removeFromStorage(key);
+        }
+
+        // if (protocolCookieContents.length) {
+            this.setCookieContentsForProtocol(protocol, []);
+        // }
+    },
+
+    crossOriginRemoveFromStorage: function(key) {
+        var protocol = this.getProtocol();
+        var protocolCookieContents = this.getCookieContentsForProtocol(protocol);
+        protocolCookieContents.push(key);
+        this.setCookieContentsForProtocol(protocol, protocolCookieContents);
+    },
+
+    getCookieContents: function() {
+        jQuery.cookie.json = true;
+        return jQuery.cookie(this.sessionStorageKey) || {};
+    },
+
+    getCookieContentsForProtocol: function(protocol) {
+        var cookieContents = this.getCookieContents();
+        return cookieContents[protocol] || [];
+    },
+
+    setCookieContentsForProtocol: function(protocol, contents) {
+        var cookieContents = this.getCookieContents();
+        cookieContents[protocol] = jQuery.unique(contents);
+
+        if (contents.length == 0) {
+            delete cookieContents[protocol];
+        }
+        
+        this.setCookieContents(cookieContents);
+    },
+
+    setCookieContents: function(contents) {
+        jQuery.cookie.json = true;
+        jQuery.cookie(this.sessionStorageKey, contents, { path: '/' });
+    },
+
+    getProtocol: function() {
+        return window.location.protocol;
+    },
+
+    getReverseProtocol: function() {
+        var result;
+        var protocol = this.getProtocol();
+        if (protocol == "http:") {
+            result = "https:";
+        } else if (protocol == "https:") {
+            result = "http:";
+        }
+        return result;
     },
 
     writeToStorage: function(blocks, unsetKey, noTriggerRefresh) {
