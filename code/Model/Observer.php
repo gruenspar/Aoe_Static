@@ -56,6 +56,28 @@ class Aoe_Static_Model_Observer
 
         $lifetime = $helper->isCacheableAction($fullActionName);
 
+        //webforms WZFK-184
+        $cmsWebform = false;
+        if ($fullActionName == 'cms_page_view') {
+            $cache = Mage::getSingleton('core/cache');
+            $request = $event->getControllerAction()->getRequest();
+            $pageId = $request->getParam('page_id');
+            $storeId = Mage::app()->getStore()->getId();
+            $key = 'webforms'. $pageId . $storeId;
+
+            $data = $cache->load($key);
+            if (!Mage::app()->useCache('collections') || !$data) {
+                $pageContent = Mage::getModel('cms/page')->load($pageId)->getContent();
+                if (strpos($pageContent, 'webforms/form') !== false) {
+                    $cmsWebform = true;
+                    $cache->save($cmsWebform, $key, array("collections"), 60 * 60 * 24);
+                }
+            } else {
+                $cmsWebform = $data;
+            }
+
+        }
+
         /* @var $response Mage_Core_Controller_Response_Http */
         $response = $controllerAction->getResponse();
         if ($lifetime && !$this->hasSpecialOptionsSet($fullActionName)) {
