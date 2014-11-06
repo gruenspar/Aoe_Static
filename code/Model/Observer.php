@@ -222,7 +222,7 @@ class Aoe_Static_Model_Observer
             $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
         }
         if (array_key_exists($name, $this->customerBlocks)) {
-            $placeholder = '<div class="placeholder" rel="%s">%s%s</div>';
+            $placeholder = '<div class="placeholder" rel="%s">%s</div>%s';
 
             if ($this->getHelper()->useSessionStorage()
                 && in_array($name, $this->getHelper()->getSessionStorageBlocks())
