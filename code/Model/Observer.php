@@ -80,7 +80,7 @@ class Aoe_Static_Model_Observer
 
         /* @var $response Mage_Core_Controller_Response_Http */
         $response = $controllerAction->getResponse();
-        if ($lifetime && !$this->hasSpecialOptionsSet($fullActionName)) {
+        if ($lifetime && !$this->hasSpecialOptionsSet($fullActionName) && !$cmsWebform) {
             // allow caching
             // Only for debugging and information
             $response->setHeader('X-Magento-Lifetime', $lifetime, true);
