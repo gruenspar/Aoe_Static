@@ -10,10 +10,11 @@
  */
 class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const CONFIG_WRITE_TO_DATABASE      = 'system/aoe_static/write_to_database';
-    const CONFIG_USE_SESSION_STORAGE    = 'system/aoe_static/use_session_storage';
-    const CONFIG_SESSION_STORAGE_BLOCKS = 'system/aoe_static/session_storage_store_blocks';
-    const CONFIG_SESSION_STORAGE_GROUPS = 'system/aoe_static/session_storage_clear_groups';
+    const CONFIG_WRITE_TO_DATABASE       = 'system/aoe_static/write_to_database';
+    const CONFIG_WRITE_TO_DATABASE_ASYNC = 'system/aoe_static/write_to_database_async';
+    const CONFIG_USE_SESSION_STORAGE     = 'system/aoe_static/use_session_storage';
+    const CONFIG_SESSION_STORAGE_BLOCKS  = 'system/aoe_static/session_storage_store_blocks';
+    const CONFIG_SESSION_STORAGE_GROUPS  = 'system/aoe_static/session_storage_clear_groups';
 
     /**
      * Chechs, if varnish is currently active
@@ -33,6 +34,16 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     public function writeToDatabase()
     {
         return Mage::getStoreConfigFlag(self::CONFIG_WRITE_TO_DATABASE);
+    }
+
+    /**
+     * Return whether to write URLs to database asynchronously.
+     *
+     * @return bool
+     */
+    public function writeToDatabaseAsync()
+    {
+        return Mage::getStoreConfigFlag(self::CONFIG_WRITE_TO_DATABASE_ASYNC);
     }
 
     /**

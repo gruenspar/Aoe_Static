@@ -4,6 +4,9 @@
 		<Aoe_Static>
 			<active>true</active>
 			<codePool>local</codePool>
+			<depends>
+				<Mns_Resque />
+			</depends>
 		</Aoe_Static>
 	</modules>
 </config>

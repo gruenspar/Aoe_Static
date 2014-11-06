@@ -73,19 +73,75 @@ class Aoe_Static_Model_Cache
         if ($this->isCacheableAction) {
 
             if ($this->getHelper()->writeToDatabase()) {
+
                 $this->tags = array_merge(
                     $this->fetchTagsForStaticBlocks($this->staticBlocks),
                     $this->tags
                 );
-                $tags = Mage::getModel('aoestatic/tag')
-                    ->loadTagsCollection(array_unique($this->tags));
-                $currentUrl = Mage::helper('core/url')->getCurrentUrl();
-                $url = Mage::getModel('aoestatic/url')
-                    ->loadOrCreateUrl($currentUrl);
-                $url->setTags($tags);
+
+                $this->tags = array_unique($this->tags);
+
+                $currentUrl = $this->getUrlHelper()->getCurrentUrl();
+
+                if ($this->getHelper()->writeToDatabaseAsync()) {
+                    $this->getResque()->addJob(
+                        'Aoe_Static_Model_Job_UrlTags',
+                        array(
+                            'url'  => $currentUrl,
+                            'tags' => $this->tags
+                        )
+                    );
+                } else {
+                    $this->saveUrlTags($currentUrl, $this->tags);
+                }
             }
         }
         return $this;
+    }
+
+    /**
+     * Save tags and URL in database.
+     *
+     * @param string $url  URL.
+     * @param array  $tags List of tags.
+     *
+     * @return $this
+     */
+    public function saveUrlTags($url, $tags)
+    {
+        $tagInstances = Mage::getModel('aoestatic/tag')
+            ->loadTagsCollection($tags);
+
+        /** @var Aoe_Static_Model_Url $url */
+        $urlInstance = Mage::getModel('aoestatic/url')
+            ->loadOrCreateUrl($url);
+
+        $urlInstance->setTags($tagInstances);
+
+        return $this;
+    }
+
+    /**
+     * Get resque instance.
+     *
+     * @return Mns_Resque_Model_Resque
+     */
+    protected function getResque()
+    {
+        /** @var Mns_Resque_Model_Factory $factory */
+        $factory = Mage::getSingleton('mnsresque/factory');
+        $result = $factory->create();
+        return $result;
+    }
+
+    /**
+     * Get core URL helper.
+     *
+     * @return Mage_Core_Helper_Url
+     */
+    public function getUrlHelper()
+    {
+        return Mage::helper('core/url');
     }
 
     /**
