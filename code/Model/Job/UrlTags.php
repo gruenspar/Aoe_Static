@@ -21,6 +21,7 @@ class Aoe_Static_Model_Job_UrlTags extends Mns_Resque_Model_Job_Abstract
         }
 
         /** @var Aoe_Static_Model_Cache $cache */
+        $cache = Mage::getModel('aoestatic/cache');
         $cache->saveUrlTags($this->args['url'], $this->args['tags']);
     }
 }
