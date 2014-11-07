@@ -76,7 +76,7 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
      *
      * @return string
      */
-    public function toJson($array)
+    public function convertArrayToJson($array)
     {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = Mage::helper('core');
@@ -94,7 +94,7 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
     public function getSessionStorageBlocks()
     {
         $blocks = $this->_getHelper()->getSessionStorageBlocks();
-        return $this->toJson($blocks);
+        return $this->convertArrayToJson($blocks);
     }
 
     /**
@@ -106,7 +106,7 @@ class Aoe_Static_Block_Beforebodyend extends Mage_Core_Block_Template {
     public function getSessionStorageGroups()
     {
         $groups = $this->_getHelper()->getSessionStorageGroups();
-        return $this->toJson($groups);
+        return $this->convertArrayToJson($groups);
     }
 
     /**
