@@ -106,7 +106,14 @@ var ajaxHomeCallPrototype = {
         });
 
         jQuery(function() {
-            jQuery('.add-to-cart').bind('click', function() {
+            var $button = jQuery('.add-to-cart');
+            var $form = $button.parents('form');
+
+            $button.bind('click', function() {
+                $this.clearCartBlocks();
+            });
+
+            $form.bind('submit', function(){
                 $this.clearCartBlocks();
             });
         });
