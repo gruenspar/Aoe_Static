@@ -11,7 +11,8 @@ var ajaxHomeInstantLoad = function(name) {
         }
     });
     caller.loadFromStorage();
-}
+};
+
 /**
  * Send ajax request to the Magento store in order to insert dynamic content into the
  * static page delivered from Varnish
@@ -86,6 +87,7 @@ var ajaxHomeCallPrototype = {
 
     bindClearEvents: function() {
         if (window.location.pathname.match(/checkout/)
+            && !jQuery("body").hasClass('checkout-cart-index')
             && !jQuery("body").hasClass('advanced-checkout-cart-index')
         ) {
             this.clearCartBlocks();
