@@ -216,7 +216,7 @@ class Aoe_Static_Model_Observer
      */
     protected function canReplaceBlock($block)
     {
-        if ($this->getHelper()->isAjaxCallback()) {
+        if ($this->getHelper()->isAjaxCall()) {
             return false;
         }
 

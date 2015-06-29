@@ -15,6 +15,10 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     const CONFIG_SESSION_STORAGE_BLOCKS = 'system/aoe_static/session_storage_store_blocks';
     const CONFIG_SESSION_STORAGE_GROUPS = 'system/aoe_static/session_storage_clear_groups';
 
+    const CONFIG_AJAX_ACTION = 'global/aoe_static/ajax_action';
+
+    protected $ajaxActions = null;
+
     /**
      * Chechs, if varnish is currently active
      *
@@ -208,6 +212,40 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Determines if current action is known to be an AJAX call.
+     *
+     * @return boolean
+     */
+    public function isAjaxCall()
+    {
+        if (is_null($this->ajaxActions)) {
+            $this->ajaxActions = $this->collectAjaxActions();
+        }
+
+        $result = in_array($this->getFullActionName(), $this->ajaxActions);
+        return $result;
+    }
+
+    /**
+     * Collect all known ajax actions from config.
+     *
+     * @return array
+     */
+    protected function collectAjaxActions()
+    {
+        $result = array();
+
+        $config = Mage::getConfig()->getNode(static::CONFIG_AJAX_ACTION);
+        if ($config) {
+            $result = $config->asArray();
+            $result = array_keys($result);
+        }
+
+        $result = array_unique($result);
+        return $result;
+    }
+
+    /**
      * Returns full action name of current request like so:
      * ModuleName_ControllerName_ActionName
      *
@@ -215,11 +253,14 @@ class Aoe_Static_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getFullActionName()
     {
-        return implode('_', array(
-            Mage::app()->getRequest()->getModuleName(),
-            Mage::app()->getRequest()->getControllerName(),
-            Mage::app()->getRequest()->getActionName(),
-        ));
+        return implode(
+            '_',
+            array(
+                Mage::app()->getRequest()->getModuleName(),
+                Mage::app()->getRequest()->getControllerName(),
+                Mage::app()->getRequest()->getActionName(),
+            )
+        );
     }
 
     /**

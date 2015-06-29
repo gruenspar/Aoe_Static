@@ -8,6 +8,12 @@
     </modules>
 
     <global>
+        <aoe_static>
+            <ajax_action>
+                <phone_call_index />
+            </ajax_action>
+        </aoe_static>
+
         <blocks>
             <aoestatic>
                 <class>Aoe_Static_Block</class>
