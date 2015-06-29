@@ -18,7 +18,8 @@ class Aoe_Static_Model_Cache
     /**
      * Collect all layout tags that where used generating the content
      *
-     * @param $observer Mage_Core_Model_Observer
+     * @param Varien_Event_Observer $observer
+     *
      * @return Aoe_Static_Model_Cache
      **/
     public function collectTags($observer)
@@ -36,7 +37,7 @@ class Aoe_Static_Model_Cache
             $tags[] = 'catalog_product_' . $block->getProduct()->getId();
         } else if ($block instanceof Mage_Catalog_Block_Product_List) {
             $productCollection = $block->getLoadedProductCollection();
-            foreach($productCollection as $product) {
+            foreach ($productCollection as $product) {
                 $tags[] = 'catalog_product_' . $product->getId();
             }
         } else if ($block instanceof Mage_Catalog_Block_Category_View) {
