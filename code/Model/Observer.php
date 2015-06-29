@@ -1,17 +1,19 @@
 <?php
+
 /**
  * Observer model
  *
- * @category    Aoe
- * @package     Aoe_Static
- * @author		Fabrizio Branca <mail@fabrizio-branca.de>
- * @author      Toni Grigoriu <toni@tonigrigoriu.com>
- * @author      Stephan Hoyer <ste.hoyer@gmail.com>
+ * @category Aoe
+ * @package  Aoe_Static
+ * @author   Fabrizio Branca <mail@fabrizio-branca.de>
+ * @author   Toni Grigoriu <toni@tonigrigoriu.com>
+ * @author   Stephan Hoyer <ste.hoyer@gmail.com>
+ * @author   Jan Papenbrock <j.papenbrock@gruenspar.de>
  */
 class Aoe_Static_Model_Observer
 {
-    var $isCacheableAction = true;
-    var $customerBlocks=null;
+    protected $isCacheableAction = null;
+    protected $customerBlocks = null;
 
     /**
      * Return whether there are special options set in the current session
@@ -41,6 +43,7 @@ class Aoe_Static_Model_Observer
      * Check when varnish caching should be enabled.
      *
      * @param Varien_Event_Observer $observer
+     *
      * @return Aoe_Static_Model_Observer
      */
     public function processPreDispatch(Varien_Event_Observer $observer)
@@ -113,6 +116,8 @@ class Aoe_Static_Model_Observer
      * Add layout handle 'aoestatic_cacheable' or 'aoestatic_notcacheable'
      *
      * @param Varien_Event_Observer $observer
+     *
+     * @return void
      */
     public function beforeLoadLayout(Varien_Event_Observer $observer)
     {
@@ -141,7 +146,9 @@ class Aoe_Static_Model_Observer
     /**
      * Purges complete Varnish cache if flag is set.
      *
-     * @param $observer
+     * @param Varien_Event_Observer $observer
+     *
+     * @return void
      */
     public function cleanVarnishCache($observer)
     {
@@ -149,10 +156,13 @@ class Aoe_Static_Model_Observer
         $varnishHelper = Mage::helper('aoestatic');
         $types = Mage::app()->getRequest()->getParam('types');
         if (Mage::app()->useCache('aoestatic') ) {
-            if( (is_array($types) && in_array('aoestatic', $types)) || $types == "aoestatic") {
+            if ((is_array($types) && in_array('aoestatic', $types)) || $types == "aoestatic") {
                 $errors = $varnishHelper->purgeAll();
                 if (count($errors) > 0) {
-                    $this->_getSession()->addError(Mage::helper('adminhtml')->__("Error while purging Varnish cache:<br />" . implode('<br />', $errors)));
+                    $this->_getSession()->addError(
+                        Mage::helper('adminhtml')
+                            ->__("Error while purging Varnish cache:<br />" . implode('<br />', $errors))
+                    );
                 } else {
                     $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__("Varnish cache cleared!"));
                 }
@@ -172,56 +182,93 @@ class Aoe_Static_Model_Observer
      */
     public function htmlBefore($observer)
     {
-        /** @var Mage_Core_Block_Abstract $block */
-        $block = $observer->getBlock();
-        $name = $block->getNameInLayout();
-        if (is_null($this->customerBlocks)) {
-            $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
-        }
-        if (array_key_exists($name, $this->customerBlocks)) {
-            $this->isCacheableAction = $this->isCacheableAction
-                && $this->getHelper()->isCacheableAction();
-            if ($this->isCacheableAction) {
-                $block->setTemplate(null);
-            }
+        if ($this->isReplaceableBlock($observer->getBlock())
+            && $this->isCacheableAction()
+        ) {
+            $observer->getBlock()->setTemplate(null);
         }
         return $this;
     }
 
     /**
      * Fires collect tags and replacePlaceholder functions for every block
-     * if current action is cachable.
+     * if current action is cacheable.
      *
-     * @param type $observer
+     * @param Varien_Event_Observer $observer
+     *
      * @return Aoe_Static_Model_Observer
      */
     public function htmlAfter($observer)
     {
-        //cache check if cachable to improve performance
-        $this->isCacheableAction = $this->isCacheableAction
-            && $this->getHelper()->isCacheableAction();
-        if ($this->isCacheableAction) {
-            Mage::getSingleton('aoestatic/cache')->collectTags($observer);
-            $this->replacePlacholder($observer);
+        if ($this->canReplaceBlock($observer->getBlock())) {
+            $this->getCache()->collectTags($observer);
+            $this->replacePlaceholder($observer);
         }
         return $this;
     }
 
     /**
-     * Replace content block wiht placeholder content
+     * Can given block block be replaced?
+     *
+     * @param Mage_Core_Block_Abstract $block
+     *
+     * @return bool
+     */
+    protected function canReplaceBlock($block)
+    {
+        if ($this->getHelper()->isAjaxCallback()) {
+            return false;
+        }
+
+        $result = $this->isReplaceableBlock($block);
+
+        return $result;
+    }
+
+    /**
+     * Is block replaceable?
+     *
+     * @param Mage_Core_Block_Abstract $block
+     *
+     * @return bool
+     */
+    protected function isReplaceableBlock($block)
+    {
+        if (is_null($this->customerBlocks)) {
+            $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
+        }
+
+        $result = array_key_exists($block->getNameInLayout(), $this->customerBlocks);
+        return $result;
+    }
+
+    /**
+     * Is current action cacheable in Varnish?
+     *
+     * @return bool
+     */
+    protected function isCacheableAction()
+    {
+        if (is_null($this->isCacheableAction)) {
+            $this->isCacheableAction = $this->getHelper()->isCacheableAction();
+        }
+
+        return $this->isCacheableAction;
+    }
+
+    /**
+     * Replace content block with placeholder content
      * if block is customer related.
      *
      * @param Varien_Event_Observer $observer
      *
      * @return void
      */
-    protected function replacePlacholder($observer)
+    protected function replacePlaceholder($observer)
     {
-        $name = $observer->getBlock()->getNameInLayout();
-        if (is_null($this->customerBlocks)) {
-            $this->customerBlocks = $this->getHelper()->getCustomerBlocks();
-        }
-        if (array_key_exists($name, $this->customerBlocks)) {
+        if ($this->isReplaceableBlock($observer->getBlock())) {
+            $name = $observer->getBlock()->getNameInLayout();
+
             $placeholder = '<div class="placeholder" rel="%s">%s</div>%s';
 
             if ($this->getHelper()->useSessionStorage()
@@ -247,6 +294,8 @@ class Aoe_Static_Model_Observer
     }
 
     /**
+     * Get module helper.
+     *
      * @return Aoe_Static_Helper_Data
      */
     public function getHelper()
@@ -254,6 +303,11 @@ class Aoe_Static_Model_Observer
         return Mage::helper('aoestatic');
     }
 
+    /**
+     * Get cache instance.
+     *
+     * @return Aoe_Static_Model_Cache
+     */
     public function getCache()
     {
         return Mage::getSingleton('aoestatic/cache');
