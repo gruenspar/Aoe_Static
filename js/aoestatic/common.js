@@ -24,7 +24,7 @@ var ajaxHomeCallPrototype = {
     currentProductId: null,
     useSessionStorage: false,
     sessionStorageKey: 'aoestatic',
-    refreshTriggerKey: 'aoestatic_refresh',
+    forceRemoveTriggerKey: 'aoestatic_remove',
     updateTriggerKey: 'aoestatic_update_',
     acceptUpdateEvents: true,
     sessionStorageBlocks: [],
@@ -102,7 +102,7 @@ var ajaxHomeCallPrototype = {
 
         jQuery(window).bind('storage', function(e) {
             var event = e.originalEvent;
-            if (event.key == $this.refreshTriggerKey && event.newValue) {
+            if (event.key == $this.forceRemoveTriggerKey && event.newValue) {
                 $this.removeFromStorage(event.newValue, true);
             }
         });
@@ -135,7 +135,7 @@ var ajaxHomeCallPrototype = {
             var blocks  = {}
             blocks[key] = content;
             $this.writeToStorage(blocks);
-            $this.triggerRefreshEvent(key)
+            $this.triggerUpdateEvent(key, content);
         });
 
         jQuery(window).bind('storage', function(e) {
@@ -172,12 +172,12 @@ var ajaxHomeCallPrototype = {
         }
     },
 
-    triggerRefreshEvent: function(blockKeys) {
+    triggerForceRemoveEvent: function(blockKeys) {
         if (typeof blockKeys == "string") {
             blockKeys = [ blockKeys ];
         }
-        localStorage.setItem(this.refreshTriggerKey, blockKeys.join(","));
-        localStorage.removeItem(this.refreshTriggerKey);
+        localStorage.setItem(this.forceRemoveTriggerKey, blockKeys.join(","));
+        localStorage.removeItem(this.forceRemoveTriggerKey);
     },
 
     triggerUpdateEvent: function(name, value) {
@@ -214,7 +214,7 @@ var ajaxHomeCallPrototype = {
         this.crossOriginRemoveFromStorage(key);
 
         if (!noTriggerRefresh) {
-            this.triggerRefreshEvent(key);
+            this.triggerForceRemoveEvent(key);
         }
     },
 
