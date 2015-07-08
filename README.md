@@ -23,8 +23,23 @@ magento folder. See the modman file to get the relations.
 The module adds a new entry into you cache list. Enable the Varnish-Cache there.
 Also there is a configuration section under Advanced -> System -> Varnish Configuration.
 
-## How to support?
+## Additional AJAX actions updating replaced blocks
 
-* Fork + Pull Requests
-* File Bugs
-* [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=cmx66&url=https://github.com/StephanHoyer/Aoe_Static&title=Aoe_Static&language=&tags=github&category=software)
+Blocks configured to be dynamic are replaced in all actions' responses per default.
+
+To have AJAX calls retrieve the original value of such dynamic block instead of its placeholder, add it to `{MyModule}/etc/config.xml`:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    ...
+    <global>
+        <aoe_static>
+            <ajax_action>
+                <!-- Pattern: <module_controller_action />-->
+                <ajaxcheckout_cart_delete />
+            </ajax_action>
+        </aoe_static>
+     ...
+```
+This extension has its own phone call route to update dynamic blocks on all pages, which comes preconfigured as an aoestatic/ajax_action.
