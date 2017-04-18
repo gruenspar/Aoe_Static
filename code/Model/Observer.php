@@ -191,8 +191,8 @@ class Aoe_Static_Model_Observer
     }
 
     /**
-     * Fires collect tags and replacePlaceholder functions for every block
-     * if current action is cacheable.
+     * If block is replacable, call replace method.
+     * If action is cachable, collect tags.
      *
      * @param Varien_Event_Observer $observer
      *
@@ -201,9 +201,13 @@ class Aoe_Static_Model_Observer
     public function htmlAfter($observer)
     {
         if ($this->canReplaceBlock($observer->getBlock())) {
-            $this->getCache()->collectTags($observer);
             $this->replacePlaceholder($observer);
         }
+
+        if ($this->isCacheableAction()) {
+            $this->getCache()->collectTags($observer);
+        }
+
         return $this;
     }
 
