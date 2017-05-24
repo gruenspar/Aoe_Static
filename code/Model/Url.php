@@ -74,13 +74,16 @@ class Aoe_Static_Model_Url extends Mage_Core_Model_Abstract
      */
     public function deleteExistingTags()
     {
+        /** @var Aoe_Static_Model_Resource_Urltag_Collection $collection */
         $collection = Mage::getModel('aoestatic/urltag')->getCollection()
             ->addFieldToFilter('url_id', $this->getId());
-        // the followng should work according docs but it doesn't
-        // $collection->delete();
-        foreach($collection as $tag) {
-            $tag->delete();
-        }
+
+        /** @var Varien_Db_Select $select */
+        $select = $collection->getSelect();
+        $delete = $select->deleteFromSelect('main_table');
+
+        $this->getWriteConnection()->query($delete);
+
         return $this;
     }
 
@@ -133,6 +136,17 @@ class Aoe_Static_Model_Url extends Mage_Core_Model_Abstract
         return Mage::getResourceModel('aoestatic/url_collection')
             ->addFieldToFilter('purge_prio', array('notnull' => true))
             ->setOrder('purge_prio', 'DESC');
+    }
+
+    /**
+     * Get write connection.
+     *
+     * @return Varien_Db_Adapter_Interface
+     */
+    private function getWriteConnection()
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        return $connection;
     }
 }
 

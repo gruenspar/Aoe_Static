@@ -25,7 +25,7 @@ class Aoe_Static_Model_Cache
     public function collectTags($observer)
     {
         $block = $observer->getBlock();
-        $tags = $block->getCacheTags();
+        $tags = array();
         if ($block instanceof Mage_Cms_Block_Block) {
             // special handling for static blocks: we cant get the real
             // id here but only the block alias, so we have to fetch it
