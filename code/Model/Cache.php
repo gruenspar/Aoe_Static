@@ -78,12 +78,14 @@ class Aoe_Static_Model_Cache
                     $this->fetchTagsForStaticBlocks($this->staticBlocks),
                     $this->tags
                 );
-                $tags = Mage::getModel('aoestatic/tag')
-                    ->loadTagsCollection(array_unique($this->tags));
-                $currentUrl = Mage::helper('core/url')->getCurrentUrl();
-                $url = Mage::getModel('aoestatic/url')
-                    ->loadOrCreateUrl($currentUrl);
-                $url->setTags($tags);
+                if (!empty($this->tags)) {
+                    $tags = Mage::getModel('aoestatic/tag')
+                        ->loadTagsCollection(array_unique($this->tags));
+                    $currentUrl = Mage::helper('core/url')->getCurrentUrl();
+                    $url = Mage::getModel('aoestatic/url')
+                        ->loadOrCreateUrl($currentUrl);
+                    $url->setTags($tags);
+                }
             }
         }
         return $this;
